@@ -52,7 +52,7 @@ class Adzuna():
       # Call
       current_page = self.starting_page + i
       base_uri = f"{self.base_url}/{self.country}/search/{current_page}"
-      response = requests.get(base_uri+base_query)
+      response = requests.get(base_uri+base_query, timeout=600)
       contents = json.loads(response.content)
 
       for r in contents['results']:
