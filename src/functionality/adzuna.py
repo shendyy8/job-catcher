@@ -39,3 +39,5 @@ def get_adzuna_job(output_bucket:str, execution_datetime:str|None=None, country:
   bucket = client.get_bucket(output_bucket)
   blobs = bucket.blob(filename)
   blobs.upload_from_file(buffer, content_type="application/octet-stream")
+
+  return {"message": f"Data successfuly uploaded into {output_bucket}/{filename}"}
