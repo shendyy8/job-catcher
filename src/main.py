@@ -16,8 +16,9 @@ def endpoint_get_adzuna_job(
     output_bucket:str,
     execution_datetime:str|None,
     country:str,
-    starting_page:int,
-    result_per_page:int
+    starting_page:int|None,
+    result_per_page:int|None,
+    total_result:int|None
     ):
 
     try:
@@ -27,7 +28,8 @@ def endpoint_get_adzuna_job(
             execution_datetime=execution_datetime,
             country=country,
             starting_page=starting_page,
-            result_per_page=result_per_page
+            result_per_page=result_per_page,
+            total_result=total_result
             )    
         return {"message": "job done", "details": response}
     

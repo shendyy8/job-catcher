@@ -4,7 +4,7 @@ import sys
 class Logger():
 
   def __init__(self):
-    logger.remove(0)
+    logger.remove()
     logger.add(sys.stdout,level="INFO")
     self._logger = logger
 

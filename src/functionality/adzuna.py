@@ -14,8 +14,9 @@ def get_adzuna_job(
     output_bucket:str, 
     execution_datetime:str|None=None, 
     country:str='gb', 
-    starting_page:int=1,
-    result_per_page:int=50
+    starting_page:int|None=1,
+    result_per_page:int|None=50,
+    total_result:int|None=50
     ):
   
   
@@ -24,21 +25,21 @@ def get_adzuna_job(
   exc_date = execution_datetime or exc_dt.strftime("%Y-%m-%d %H:%M:%S")
   exc_date_object = datetime.strptime(exc_date, "%Y-%m-%d %H:%M:%S")
 
-  time_string = f"{exc_date_object.hour}{exc_date_object.minute}{exc_date_object.strftime("%S")}"
+  time_string = f"{exc_date_object.strftime("%H")}{exc_date_object.strftime("%M")}{exc_date_object.strftime("%S")}"
   date_string = exc_date_object.strftime("%Y%m%d")
 
   filename = f"adzuna/{date_string}/job_{country}_{time_string}.parquet"
   adzuna = Adzuna()
   buffer = BytesIO()
   adzuna.set_country(country)
-  adzuna.starting_page = starting_page
-  adzuna.result_per_page = result_per_page
+  adzuna.starting_page = starting_page or 1
+  adzuna.result_per_page = result_per_page or 50
 
   log.info('get_adzuna_job: Setting up variable Done')
 
   # Search for Job
 
-  df = adzuna.search_job(result_count=50)
+  df = adzuna.search_job(result_count= total_result or 50)
 
   df["created"] = pd.to_datetime(df["created"], utc=True)
   df['execution_datetime'] = exc_date_object
