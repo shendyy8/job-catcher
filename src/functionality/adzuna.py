@@ -2,14 +2,22 @@ from dotenv import load_dotenv
 import pandas as pd 
 from datetime import datetime
 from classes.adzuna_wrapper import Adzuna
+from classes.logger import Logger
 from google.cloud import storage
 from io import BytesIO
 
 # Setup Credentials & Secrets
 load_dotenv()
+log = Logger().get_logger()
 
-
-def get_adzuna_job(output_bucket:str, execution_datetime:str|None=None, country:str='gb'):
+def get_adzuna_job(
+    output_bucket:str, 
+    execution_datetime:str|None=None, 
+    country:str='gb', 
+    starting_page:int=1,
+    result_per_page:int=50
+    ):
+  
   
   # Setup variables
   exc_dt = datetime.now()
@@ -23,8 +31,13 @@ def get_adzuna_job(output_bucket:str, execution_datetime:str|None=None, country:
   adzuna = Adzuna()
   buffer = BytesIO()
   adzuna.set_country(country)
+  adzuna.starting_page = starting_page
+  adzuna.result_per_page = result_per_page
+
+  log.info('get_adzuna_job: Setting up variable Done')
 
   # Search for Job
+
   df = adzuna.search_job(result_count=50)
 
   df["created"] = pd.to_datetime(df["created"], utc=True)
@@ -33,11 +46,14 @@ def get_adzuna_job(output_bucket:str, execution_datetime:str|None=None, country:
   
   df.to_parquet(buffer, engine='pyarrow', compression='snappy', index=False)
   buffer.seek(0)
+  log.info(f'get_adzuna_job: Searching Job to Adzuna Done')
 
   # Setup Storage Client
   client = storage.Client()
   bucket = client.get_bucket(output_bucket)
   blobs = bucket.blob(filename)
   blobs.upload_from_file(buffer, content_type="application/octet-stream")
+  
+  log.info(f'get_adzuna_job: Uploading Data to {output_bucket}/{filename} Done')
 
-  return {"message": f"Data successfuly uploaded into {output_bucket}/{filename}"}
+  return f"Data successfuly uploaded into {output_bucket}/{filename}"

@@ -7,8 +7,10 @@ import json
 import pycountry
 from typing import Optional
 import pandas as pd 
+from classes.logger import Logger
 
 load_dotenv()
+log = Logger().get_logger()
 
 # can be made into query builder class
 class Adzuna():
@@ -52,6 +54,8 @@ class Adzuna():
       # Call
       current_page = self.starting_page + i
       base_uri = f"{self.base_url}/{self.country}/search/{current_page}"
+
+      log.debug(f"Requesting data to Adzuna page: {current_page}")
       response = requests.get(base_uri+base_query, timeout=600)
       contents = json.loads(response.content)
 
