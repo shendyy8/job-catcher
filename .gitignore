@@ -1,3 +1,6 @@
 .venv
 .env
 __test__
+
+__pycache__
+*/__pycache__
