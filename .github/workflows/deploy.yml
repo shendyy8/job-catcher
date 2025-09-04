@@ -46,4 +46,5 @@ jobs:
             --region $REGION \
             --platform managed \
             --allow-unauthenticated \
+            --port 8000 \
             --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
