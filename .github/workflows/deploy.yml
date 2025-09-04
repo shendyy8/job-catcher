@@ -1,0 +1,53 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: ['prd']
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GAR_LOCATION: asia-southeast1
+  REPOSITORY: oceanic-purple-turtle
+  SERVICE: job-catcher
+  REGION: asia-southeast1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Decode GCP service account key
+        run: |
+          echo "${{ secrets.GCP_SA_KEY }}" | base64 -d > "${{ github.workspace }}/gcp-key.json"
+
+      - name: set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ github.workspace }}/gcp-key.json
+          export_default_credentials: true
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev --quiet
+
+      - name: Build and Push Docker image
+        run: |
+          IMAGE_URI=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE \
+            --image $IMAGE_URI \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Clean up service account key
+        run: rm -f "${{ github.workspace }}/gcp-key.json"
