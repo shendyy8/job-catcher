@@ -19,14 +19,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Decode GCP service account key
-        run: |
-          echo "${{ secrets.GCP_SA_KEY }}" | base64 -d > "${{ github.workspace }}/gcp-key.json"
-
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ github.workspace }}/gcp-key.json
+          credentials_json: ${{ secrets.SERVICE_ACCOUNT }}
 
       - name: set up gcloud
         uses: google-github-actions/setup-gcloud@v2
@@ -51,6 +47,3 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Clean up service account key
-        run: rm -f "${{ github.workspace }}/gcp-key.json"
