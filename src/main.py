@@ -1,9 +1,15 @@
 from fastapi import FastAPI, HTTPException
 from functionality.adzuna import get_adzuna_job
 from classes.logger import Logger
+from classes.secrets import access_secret
+import os
 
+# Setups
 app = FastAPI()
 log = Logger().get_logger()
+os.environ['ADZUNA_BASE_URL'] = access_secret('ADZUNA_BASE_URL')
+os.environ['ADZUNA_APP_ID'] = access_secret('ADZUNA_APP_ID')
+os.environ['ADZUNA_APP_KEY'] = access_secret('ADZUNA_APP_KEY')
 
 @app.get("/")
 def home() -> dict:
