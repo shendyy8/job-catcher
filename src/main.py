@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from functionality.adzuna import get_adzuna_job
 from classes.logger import Logger
 from classes.secrets import access_secret
+from typing import Optional
 import os
 
 # Setups
@@ -20,11 +21,11 @@ def home() -> dict:
 @app.get("/adzuna_job")
 def endpoint_get_adzuna_job(
     output_bucket:str,
-    execution_datetime:str|None,
     country:str,
-    starting_page:int|None,
-    result_per_page:int|None,
-    total_result:int|None
+    execution_datetime:Optional[str]=None,
+    starting_page:Optional[int]=None,
+    result_per_page:Optional[int]=None,
+    total_result:Optional[int]=None
     ):
 
     try:
